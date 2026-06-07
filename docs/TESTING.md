@@ -79,10 +79,14 @@ Pop-Location
 
 ## 六、測試互動頁
 
-開啟：
+推薦直接開線上版：
+
+[開啟互動教學：Codex Coreutils Shell Guard](https://lzxpan.github.io/codex-coreutils-shell-guard/)
+
+如果你已經把 repo 下載到本機，也可以在 repo 根目錄執行：
 
 ```powershell
-Start-Process "docs\index.html"
+Start-Process ".\docs\index.html"
 ```
 
 確認：

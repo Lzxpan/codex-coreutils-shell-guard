@@ -83,14 +83,19 @@ round-trip 是來回測試，意思是把中文寫出去再讀回來，確認沒
 - [docs/USAGE_SCENARIOS.md](docs/USAGE_SCENARIOS.md)：使用情境。
 - [docs/TESTING.md](docs/TESTING.md)：驗證方式。
 - [docs/ROLLBACK.md](docs/ROLLBACK.md)：移除與回復方式。
-- [docs/index.html](docs/index.html)：科技漫畫風互動教學頁。
+- [線上互動教學](https://lzxpan.github.io/codex-coreutils-shell-guard/)：科技漫畫風互動教學頁，推薦直接點這個連結開啟。
+- [docs/index.html](docs/index.html)：互動教學原始檔，適合想看 HTML 原始碼的人。
 
 ## 互動教學
 
-打開：
+推薦直接開線上版：
+
+[開啟互動教學：Codex Coreutils Shell Guard](https://lzxpan.github.io/codex-coreutils-shell-guard/)
+
+如果你已經把 repo 下載到本機，也可以在 repo 根目錄執行：
 
 ```powershell
-Start-Process "docs\index.html"
+Start-Process ".\docs\index.html"
 ```
 
 教學頁會用多格科技漫畫說明：
