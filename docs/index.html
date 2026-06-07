@@ -40,14 +40,14 @@
       height: 100vh;
       display: grid;
       place-items: center;
-      padding: 18px;
+      padding: 12px;
     }
 
     .stage {
       position: relative;
       width: 1920px;
       height: 1080px;
-      transform-origin: center;
+      transform-origin: top left;
       overflow: hidden;
       border: 1px solid rgba(139, 216, 255, .38);
       background: linear-gradient(135deg, #08111d 0%, #0a1421 45%, #17110b 100%);
@@ -195,6 +195,33 @@
       background: linear-gradient(90deg, rgba(6, 11, 18, .22), transparent 45%, rgba(6, 11, 18, .35));
       pointer-events: none;
     }
+
+    .comic-caption {
+      position: absolute;
+      z-index: 3;
+      max-width: 270px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 255, 255, .7);
+      background: rgba(5, 12, 22, .78);
+      color: #ffffff;
+      font-size: 23px;
+      font-weight: 800;
+      line-height: 1.25;
+      box-shadow: 0 0 20px rgba(54, 217, 255, .28);
+    }
+
+    .comic-caption small {
+      display: block;
+      margin-top: 4px;
+      color: #bdefff;
+      font-size: 17px;
+      font-weight: 500;
+    }
+
+    .comic-caption.one { left: 24px; top: 22px; }
+    .comic-caption.two { right: 24px; top: 22px; border-color: rgba(255, 184, 61, .78); }
+    .comic-caption.three { left: 24px; bottom: 22px; }
+    .comic-caption.four { right: 24px; bottom: 22px; border-color: rgba(99, 255, 184, .78); }
 
     .dialog {
       position: absolute;
@@ -462,23 +489,28 @@
 
     .nav {
       position: absolute;
-      left: 72px;
       right: 72px;
-      bottom: 20px;
+      top: 86px;
       display: flex;
-      justify-content: space-between;
+      gap: 14px;
+      justify-content: flex-end;
       align-items: center;
+      padding: 10px 12px;
+      border: 1px solid rgba(151, 219, 255, .28);
+      background: rgba(6, 15, 26, .74);
       z-index: 30;
     }
 
     .nav button {
-      width: 180px;
+      width: 150px;
       text-align: center;
     }
 
     .hint {
       color: var(--muted);
-      font-size: 22px;
+      max-width: 360px;
+      font-size: 19px;
+      line-height: 1.35;
     }
 
     .copy {
@@ -496,6 +528,245 @@
 
     @media (prefers-reduced-motion: reduce) {
       .slide { transition: none; }
+    }
+
+    @media (max-width: 720px), (max-height: 520px) {
+      html, body {
+        height: auto;
+        min-height: 100%;
+        overflow: auto;
+      }
+
+      .viewport {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        padding: 0;
+      }
+
+      .stage {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .hud {
+        position: sticky;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 14px 16px;
+        gap: 12px;
+        font-size: 13px;
+        background: rgba(6, 15, 26, .96);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        max-width: 55vw;
+        line-height: 1.25;
+      }
+
+      .progress {
+        gap: 8px;
+      }
+
+      .pips {
+        display: none;
+      }
+
+      .slide {
+        position: relative;
+        display: none;
+        inset: auto;
+        min-height: calc(100vh - 76px);
+        padding: 28px 16px 118px;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: none;
+        transition: none;
+      }
+
+      .slide.active {
+        display: block;
+        transform: none;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: 38px;
+      }
+
+      h2 {
+        font-size: 31px;
+      }
+
+      p {
+        font-size: 18px;
+        line-height: 1.65;
+      }
+
+      .kicker {
+        margin-top: 10px;
+        margin-bottom: 16px;
+        font-size: 15px;
+      }
+
+      .kicker::before {
+        width: 18px;
+        height: 18px;
+        border-width: 2px;
+      }
+
+      .hero-layout,
+      .battle,
+      .scenario,
+      .cards,
+      .checklist {
+        display: grid;
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 18px;
+        padding-bottom: 0;
+      }
+
+      .hero-art {
+        height: auto;
+        aspect-ratio: 1 / 1;
+        margin: 4px 0 0;
+      }
+
+      .comic-caption {
+        max-width: 45%;
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+
+      .comic-caption small {
+        font-size: 11px;
+      }
+
+      .comic-caption.one { left: 10px; top: 10px; }
+      .comic-caption.two { right: 10px; top: 10px; }
+      .comic-caption.three { left: 10px; bottom: 10px; }
+      .comic-caption.four { right: 10px; bottom: 10px; }
+
+      .dialog {
+        position: relative;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        min-height: 0;
+        grid-template-columns: 64px 1fr;
+        gap: 12px;
+        margin-top: 20px;
+        padding: 12px;
+      }
+
+      .portrait {
+        min-height: 64px;
+      }
+
+      .face {
+        width: 42px;
+        height: 42px;
+        border-width: 3px;
+      }
+
+      .name {
+        font-size: 16px;
+      }
+
+      .dialog-text {
+        font-size: 18px;
+      }
+
+      .card,
+      .check {
+        min-height: 0;
+        padding: 16px;
+      }
+
+      .card strong {
+        font-size: 22px;
+      }
+
+      .card p,
+      .check,
+      .explain p {
+        font-size: 16px;
+      }
+
+      .fighter,
+      .enemy {
+        height: 210px;
+      }
+
+      .attack {
+        gap: 12px;
+      }
+
+      .damage {
+        font-size: 58px;
+      }
+
+      .robot {
+        width: 130px;
+        height: 150px;
+      }
+
+      .monster {
+        width: 150px;
+        height: 145px;
+      }
+
+      .terminal {
+        min-height: 210px;
+        max-height: 38vh;
+        overflow: auto;
+        padding: 14px;
+        font-size: 13px;
+      }
+
+      .scenario-buttons button,
+      .copy {
+        width: 100%;
+        padding: 13px 14px;
+        font-size: 16px;
+      }
+
+      .explain {
+        padding: 14px;
+      }
+
+      .nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px;
+        background: rgba(6, 15, 26, .96);
+        border-top: 1px solid var(--line);
+      }
+
+      .nav button {
+        width: auto;
+        min-width: 82px;
+        padding: 12px 10px;
+        font-size: 16px;
+      }
+
+      .hint {
+        max-width: none;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -520,6 +791,10 @@
           </div>
           <figure class="hero-art">
             <img src="assets/tech-comic-coreutils-guard.png" alt="科技漫畫風的工具機器人防守亂碼怪">
+            <figcaption class="comic-caption one">亂碼來襲<small>中文與管線一起出錯</small></figcaption>
+            <figcaption class="comic-caption two">UTF-8 防護<small>先把文字通道穩住</small></figcaption>
+            <figcaption class="comic-caption three">工具隊出場<small>用 `grep.exe`、`cat.exe`</small></figcaption>
+            <figcaption class="comic-caption four">驗證通過<small>用測試證明不是猜的</small></figcaption>
           </figure>
         </div>
         <div class="dialog">
@@ -690,8 +965,17 @@
     let activeCase = "alias";
 
     function fit() {
-      const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-      stage.style.transform = `scale(${scale})`;
+      const viewport = window.visualViewport || window;
+      const width = viewport.width || window.innerWidth;
+      const height = viewport.height || window.innerHeight;
+      const compact = width <= 720 || height <= 520;
+      document.documentElement.classList.toggle("compact", compact);
+      if (compact) {
+        stage.style.zoom = "";
+        return;
+      }
+      const scale = Math.min((width - 24) / 1920, (height - 24) / 1080, 1);
+      stage.style.zoom = String(Math.max(scale, 0.1));
     }
 
     function renderPips() {
@@ -703,6 +987,9 @@
       slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
       counter.textContent = String(index + 1).padStart(2, "0") + " / " + String(slides.length).padStart(2, "0");
       renderPips();
+      if (document.documentElement.classList.contains("compact")) {
+        window.scrollTo(0, 0);
+      }
     }
 
     function renderCase(name) {
