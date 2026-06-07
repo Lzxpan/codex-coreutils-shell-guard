@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coreutils Windows 原生命令"
+  short_description: "用 Windows Coreutils 穩定處理文字工具"
+  default_prompt: "Use $coreutils-windows-native-tools when choosing Windows-native Coreutils commands such as grep.exe, cat.exe, wc.exe, or xargs.exe, especially inside PowerShell where aliases and UTF-8 handling matter."

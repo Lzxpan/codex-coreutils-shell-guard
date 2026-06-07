@@ -1,0 +1,20 @@
+{
+  "name": "codex-coreutils-shell-guard",
+  "interface": {
+    "displayName": "Codex Coreutils Shell Guard"
+  },
+  "plugins": [
+    {
+      "name": "coreutils-shell-guard",
+      "source": {
+        "source": "local",
+        "path": "./plugins/coreutils-shell-guard"
+      },
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

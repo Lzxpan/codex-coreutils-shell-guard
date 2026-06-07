@@ -1,0 +1,41 @@
+{
+  "name": "coreutils-shell-guard",
+  "version": "0.1.0",
+  "description": "Reminder and diagnostic hooks for using PowerShell UTF-8 Guard and Coreutils for Windows safely in Codex.",
+  "author": {
+    "name": "Lzxpan",
+    "email": "local@example.invalid",
+    "url": "https://github.com/Lzxpan"
+  },
+  "homepage": "https://github.com/Lzxpan/codex-coreutils-shell-guard",
+  "repository": "https://github.com/Lzxpan/codex-coreutils-shell-guard",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "powershell",
+    "utf-8",
+    "coreutils",
+    "windows"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "interface": {
+    "displayName": "Coreutils Shell Guard",
+    "shortDescription": "提醒 Codex 使用 UTF-8 與 Coreutils 防護",
+    "longDescription": "在 Codex 工作階段開始與 shell 工具使用後，提醒使用 PowerShell UTF-8 Guard 與 Coreutils for Windows 的安全規則。此 plugin 不改寫命令、不修改 PATH、不修改 $PROFILE。",
+    "developerName": "Lzxpan",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/Lzxpan/codex-coreutils-shell-guard",
+    "privacyPolicyURL": "https://github.com/Lzxpan/codex-coreutils-shell-guard",
+    "termsOfServiceURL": "https://github.com/Lzxpan/codex-coreutils-shell-guard",
+    "defaultPrompt": [
+      "Check shell encoding and Coreutils safety before running commands.",
+      "Remind me when PowerShell commands need UTF-8 protection.",
+      "Warn when Coreutils commands may conflict with PowerShell aliases."
+    ],
+    "brandColor": "#0EA5E9"
+  }
+}

@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex Coreutils Shell Guard 互動教學</title>
+  <style>
+    :root {
+      --bg: #060b12;
+      --panel: #0d1724;
+      --panel-2: #101f31;
+      --cyan: #36d9ff;
+      --amber: #ffb83d;
+      --red: #ff426d;
+      --green: #63ffb8;
+      --ink: #f4f7fb;
+      --muted: #aeb9c7;
+      --line: rgba(151, 219, 255, .34);
+      --shadow: rgba(0, 0, 0, .45);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 20% 0%, #14335a 0, transparent 26%),
+        radial-gradient(circle at 80% 10%, #4b2505 0, transparent 24%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    }
+
+    button, code { font: inherit; }
+
+    .viewport {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .stage {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: center;
+      overflow: hidden;
+      border: 1px solid rgba(139, 216, 255, .38);
+      background: linear-gradient(135deg, #08111d 0%, #0a1421 45%, #17110b 100%);
+      box-shadow: 0 26px 70px var(--shadow);
+    }
+
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(54, 217, 255, .08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(54, 217, 255, .08) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(circle at 50% 45%, black 0, transparent 72%);
+      pointer-events: none;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 72px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .32s ease, transform .32s ease;
+      transform: translateX(36px);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+
+    .hud {
+      position: absolute;
+      left: 72px;
+      right: 72px;
+      top: 34px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      letter-spacing: .05em;
+      font-size: 22px;
+      z-index: 20;
+    }
+
+    .brand {
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .pips {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pip {
+      width: 20px;
+      height: 8px;
+      border: 1px solid var(--line);
+      background: rgba(54, 217, 255, .12);
+    }
+
+    .pip.on { background: var(--amber); border-color: var(--amber); }
+
+    h1 {
+      margin: 0;
+      max-width: 1180px;
+      font-size: 84px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 26px;
+      font-size: 58px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.65;
+      color: #d9e4f2;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+      color: var(--amber);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .kicker::before {
+      content: "";
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--amber);
+      box-shadow: inset 0 0 0 6px rgba(255, 184, 61, .18);
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1fr 680px;
+      gap: 50px;
+      align-items: center;
+      height: 100%;
+      padding-top: 18px;
+    }
+
+    .hero-art {
+      position: relative;
+      height: 620px;
+      border: 2px solid rgba(54, 217, 255, .45);
+      background: #07101b;
+      overflow: hidden;
+      box-shadow: 0 0 0 8px rgba(54, 217, 255, .05), 0 0 50px rgba(54, 217, 255, .18);
+    }
+
+    .hero-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(1.12) contrast(1.05);
+    }
+
+    .hero-art::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(6, 11, 18, .22), transparent 45%, rgba(6, 11, 18, .35));
+      pointer-events: none;
+    }
+
+    .dialog {
+      position: absolute;
+      left: 72px;
+      right: 72px;
+      bottom: 54px;
+      min-height: 186px;
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 24px;
+      align-items: stretch;
+      padding: 18px;
+      border: 2px solid rgba(90, 192, 255, .55);
+      background: linear-gradient(180deg, rgba(13, 35, 61, .92), rgba(8, 18, 31, .96));
+      box-shadow: 0 -14px 38px rgba(0, 0, 0, .38);
+      z-index: 10;
+    }
+
+    .portrait {
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(99, 255, 184, .5);
+      background: radial-gradient(circle at 50% 35%, #29d7ff 0, #0c3951 34%, #07111d 70%);
+    }
+
+    .face {
+      width: 96px;
+      height: 96px;
+      border: 6px solid #dffaff;
+      background: linear-gradient(135deg, #effcff, #45c9ff);
+      clip-path: polygon(50% 0, 86% 18%, 100% 55%, 78% 100%, 22% 100%, 0 55%, 14% 18%);
+      box-shadow: 0 0 26px rgba(54, 217, 255, .7);
+    }
+
+    .name {
+      margin-bottom: 8px;
+      color: var(--green);
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .dialog-text {
+      font-size: 33px;
+      line-height: 1.55;
+      color: #eef8ff;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+      margin-top: 36px;
+    }
+
+    .card {
+      min-height: 270px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(16, 31, 49, .92), rgba(9, 17, 28, .94));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04);
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 14px;
+      color: var(--cyan);
+      font-size: 34px;
+    }
+
+    .card p {
+      font-size: 25px;
+      line-height: 1.5;
+    }
+
+    .battle {
+      display: grid;
+      grid-template-columns: 430px 1fr 430px;
+      gap: 28px;
+      align-items: center;
+      height: 710px;
+      padding-bottom: 110px;
+    }
+
+    .fighter, .enemy {
+      position: relative;
+      height: 430px;
+      border: 2px solid var(--line);
+      background: radial-gradient(circle at center, rgba(54, 217, 255, .18), rgba(8, 18, 31, .94));
+      overflow: hidden;
+    }
+
+    .enemy {
+      background: radial-gradient(circle at center, rgba(255, 66, 109, .2), rgba(8, 18, 31, .94));
+      border-color: rgba(255, 66, 109, .55);
+    }
+
+    .robot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 230px;
+      height: 260px;
+      transform: translate(-50%, -50%);
+    }
+
+    .robot::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 24px;
+      width: 120px;
+      height: 120px;
+      transform: translateX(-50%);
+      background: linear-gradient(145deg, #dffaff, #2fd4ff);
+      clip-path: polygon(50% 0, 92% 22%, 100% 68%, 70% 100%, 30% 100%, 0 68%, 8% 22%);
+      box-shadow: 0 0 28px rgba(54, 217, 255, .65);
+    }
+
+    .robot::after {
+      content: "";
+      position: absolute;
+      left: 34px;
+      right: 34px;
+      bottom: 16px;
+      height: 135px;
+      background: linear-gradient(145deg, #0a87c0, #eefcff 52%, #12597c);
+      clip-path: polygon(20% 0, 80% 0, 100% 80%, 72% 100%, 28% 100%, 0 80%);
+    }
+
+    .monster {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 260px;
+      height: 250px;
+      transform: translate(-50%, -50%) rotate(-8deg);
+      background: radial-gradient(circle at 50% 50%, #ff426d 0 6%, #111827 7% 40%, transparent 41%),
+        repeating-linear-gradient(90deg, rgba(255, 66, 109, .85) 0 8px, transparent 8px 22px);
+      filter: drop-shadow(0 0 22px rgba(255, 66, 109, .65));
+      clip-path: polygon(8% 20%, 38% 5%, 65% 15%, 94% 8%, 80% 38%, 98% 52%, 76% 65%, 84% 95%, 52% 76%, 19% 94%, 28% 62%, 0 48%, 22% 36%);
+    }
+
+    .status {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: grid;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .bar {
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, .32);
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+    }
+
+    .bar.red span { background: linear-gradient(90deg, var(--red), var(--amber)); }
+
+    .attack {
+      display: grid;
+      gap: 24px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .damage {
+      font-size: 118px;
+      font-weight: 900;
+      color: var(--amber);
+      text-shadow: 0 8px 0 #5c2f00, 0 0 28px rgba(255, 184, 61, .8);
+    }
+
+    .beam {
+      width: 100%;
+      height: 14px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--amber), transparent);
+      box-shadow: 0 0 28px rgba(54, 217, 255, .75);
+    }
+
+    .scenario {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 36px;
+      height: 720px;
+      padding-bottom: 110px;
+    }
+
+    .scenario-buttons {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .scenario-buttons button, .nav button, .copy {
+      border: 1px solid var(--line);
+      background: rgba(13, 31, 49, .9);
+      color: var(--ink);
+      padding: 18px 22px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 24px;
+    }
+
+    .scenario-buttons button.active {
+      border-color: var(--amber);
+      background: rgba(255, 184, 61, .18);
+      color: #fff5dc;
+    }
+
+    .terminal {
+      min-height: 430px;
+      padding: 28px;
+      border: 1px solid rgba(99, 255, 184, .42);
+      background: #06100d;
+      color: #d7ffef;
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 24px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow: hidden;
+    }
+
+    .explain {
+      margin-top: 22px;
+      padding: 24px;
+      border-left: 8px solid var(--amber);
+      background: rgba(255, 184, 61, .1);
+    }
+
+    .explain p { font-size: 26px; }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 34px;
+    }
+
+    .check {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 22px;
+      border: 1px solid var(--line);
+      background: rgba(13, 31, 49, .82);
+      font-size: 26px;
+      line-height: 1.45;
+    }
+
+    .box {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--green);
+      box-shadow: inset 0 0 0 5px rgba(99, 255, 184, .15);
+    }
+
+    .nav {
+      position: absolute;
+      left: 72px;
+      right: 72px;
+      bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 30;
+    }
+
+    .nav button {
+      width: 180px;
+      text-align: center;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 22px;
+    }
+
+    .copy {
+      margin-top: 18px;
+      width: 220px;
+      text-align: center;
+      border-color: rgba(99, 255, 184, .5);
+    }
+
+    .copied {
+      color: var(--green);
+      font-size: 22px;
+      margin-left: 14px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="viewport">
+    <section class="stage" id="stage" aria-label="Codex Coreutils Shell Guard 互動教學">
+      <div class="grid"></div>
+      <header class="hud">
+        <div class="brand">CODEX COREUTILS SHELL GUARD</div>
+        <div class="progress">
+          <span id="counter">01 / 06</span>
+          <div class="pips" id="pips"></div>
+        </div>
+      </header>
+
+      <article class="slide active">
+        <div class="hero-layout">
+          <div>
+            <div class="kicker">互動教學</div>
+            <h1>讓 Codex 在 Windows shell 裡少踩亂碼坑</h1>
+            <p style="margin-top: 28px; max-width: 980px;">這套 repo 分享一個技能與一個掛鉤。技能教 Codex 怎麼選工具；掛鉤在容易出錯時提醒。</p>
+          </div>
+          <figure class="hero-art">
+            <img src="assets/tech-comic-coreutils-guard.png" alt="科技漫畫風的工具機器人防守亂碼怪">
+          </figure>
+        </div>
+        <div class="dialog">
+          <div class="portrait"><div class="face"></div></div>
+          <div>
+            <div class="name">UTF-8 防衛機</div>
+            <div class="dialog-text">「先把中文通道穩住，再派 Coreutils 工具隊出場。」</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="slide">
+        <div class="kicker">第一回合</div>
+        <h2>亂碼怪通常不是單一工具造成</h2>
+        <div class="battle">
+          <div class="enemy">
+            <div class="status">
+              <div class="bar red"><span style="width:88%"></span></div>
+              <div class="bar"><span style="width:42%"></span></div>
+            </div>
+            <div class="monster"></div>
+          </div>
+          <div class="attack">
+            <div class="damage">995</div>
+            <div class="beam"></div>
+            <p>中文、JSON、Markdown、log 經過管線或重導向時，如果 PowerShell 編碼沒先設好，就可能壞掉。</p>
+          </div>
+          <div class="fighter">
+            <div class="status">
+              <div class="bar"><span style="width:96%"></span></div>
+              <div class="bar"><span style="width:76%"></span></div>
+            </div>
+            <div class="robot"></div>
+          </div>
+        </div>
+        <div class="dialog">
+          <div class="portrait"><div class="face"></div></div>
+          <div>
+            <div class="name">操作提示</div>
+            <div class="dialog-text">「Coreutils 可以幫忙處理文字，但不能自己修好 PowerShell 編碼。」</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="slide">
+        <div class="kicker">技能與掛鉤</div>
+        <h2>一個負責教學，一個負責提醒</h2>
+        <div class="cards">
+          <div class="card">
+            <strong>技能</strong>
+            <p>`coreutils-windows-native-tools` 像小手冊。它教 Codex 何時用 `grep.exe`、`cat.exe`、`wc.exe`、`xargs.exe`。</p>
+          </div>
+          <div class="card">
+            <strong>掛鉤</strong>
+            <p>`coreutils-shell-guard` 像警示燈。工作開始或 shell 用完後，提醒可能有 alias、管線或 UTF-8 風險。</p>
+          </div>
+          <div class="card">
+            <strong>安全邊界</strong>
+            <p>掛鉤只提醒，不改寫命令，不改 `$PROFILE`，不改系統 PATH，也不隱藏錯誤。</p>
+          </div>
+        </div>
+        <div class="dialog">
+          <div class="portrait"><div class="face"></div></div>
+          <div>
+            <div class="name">判斷摘要</div>
+            <div class="dialog-text">「讓提醒自動出現，但把真正修改交給 Codex 明確執行。」</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="slide">
+        <div class="kicker">情境選擇</div>
+        <h2>選一個常見問題，看建議命令</h2>
+        <div class="scenario">
+          <div class="scenario-buttons">
+            <button class="active" data-case="alias">`cat` 不是 `cat.exe`</button>
+            <button data-case="utf8">中文輸出到檔案</button>
+            <button data-case="grep">搜尋繁體中文</button>
+            <button data-case="count">計算命中行數</button>
+          </div>
+          <div>
+            <pre class="terminal" id="terminal"></pre>
+            <button class="copy" id="copyBtn">複製命令</button><span class="copied" id="copied"></span>
+            <div class="explain"><p id="explain"></p></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="slide">
+        <div class="kicker">驗證清單</div>
+        <h2>安裝後看這些，不要只看感覺</h2>
+        <div class="checklist">
+          <div class="check"><div class="box"></div><div>`quick_validate.py` 顯示 `Skill is valid!`。</div></div>
+          <div class="check"><div class="box"></div><div>`plugin.json`、`hooks.json`、`marketplace.json` 都能被 JSON parser 讀取。</div></div>
+          <div class="check"><div class="box"></div><div>`Test-CoreutilsWindows.ps1` 的 `RoundTripPassed` 是 `True`。</div></div>
+          <div class="check"><div class="box"></div><div>`session-start.ps1` 能輸出 `[coreutils-shell-guard]` 提醒。</div></div>
+          <div class="check"><div class="box"></div><div>`post-shell-check.ps1` 對 `cat file.txt > out.txt` 會提醒 alias 與 UTF-8 風險。</div></div>
+          <div class="check"><div class="box"></div><div>Codex 掛鉤頁已信任 `coreutils-shell-guard`。</div></div>
+        </div>
+        <div class="dialog">
+          <div class="portrait"><div class="face"></div></div>
+          <div>
+            <div class="name">驗證原則</div>
+            <div class="dialog-text">「沒有跑過的項目，不要說成已驗證。請標成 `not_verified`。」</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="slide">
+        <div class="kicker">最後一回合</div>
+        <h2>建議工作順序</h2>
+        <div class="cards">
+          <div class="card">
+            <strong>一、先防亂碼</strong>
+            <p>遇到中文、Unicode、JSON、Markdown、log、重導向，先套 PowerShell UTF-8 防護。</p>
+          </div>
+          <div class="card">
+            <strong>二、再選工具</strong>
+            <p>需要 Coreutils 時，寫完整 `.exe` 名稱，例如 `grep.exe`、`cat.exe`、`wc.exe`。</p>
+          </div>
+          <div class="card">
+            <strong>三、看提醒</strong>
+            <p>掛鉤提醒不是失敗，而是提示你這次 shell 命令可能需要更穩的寫法。</p>
+          </div>
+        </div>
+        <div class="dialog">
+          <div class="portrait"><div class="face"></div></div>
+          <div>
+            <div class="name">任務完成</div>
+            <div class="dialog-text">「技能負責方法，掛鉤負責提醒，驗證負責證明。」</div>
+          </div>
+        </div>
+      </article>
+
+      <footer class="nav">
+        <button id="prevBtn">上一頁</button>
+        <div class="hint">使用左右方向鍵切換。所有命令與路徑保留原文。</div>
+        <button id="nextBtn">下一頁</button>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    const stage = document.getElementById("stage");
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const pips = document.getElementById("pips");
+    const counter = document.getElementById("counter");
+    const cases = {
+      alias: {
+        command: "Get-Command cat, cat.exe -ErrorAction SilentlyContinue",
+        explain: "`cat` 在 PowerShell 裡常是 `Get-Content` 的 alias。要確定呼叫 Coreutils，請寫 `cat.exe`。"
+      },
+      utf8: {
+        command: "$utf8NoBom = [System.Text.UTF8Encoding]::new($false)\\n[Console]::InputEncoding = $utf8NoBom\\n[Console]::OutputEncoding = $utf8NoBom\\n$OutputEncoding = $utf8NoBom\\nchcp.com 65001 > $null\\nGet-Content -LiteralPath .\\\\file.txt -Encoding utf8 | Set-Content -LiteralPath .\\\\out.txt -Encoding utf8",
+        explain: "重導向與文字檔寫入要明確指定 UTF-8。這樣中文比較不會變亂碼。"
+      },
+      grep: {
+        command: "$env:Path = \"C:\\\\Program Files\\\\coreutils\\\\bin;$env:Path\"\\ngrep.exe -n \"繁體中文\" README.md",
+        explain: "使用 `grep.exe` 可以避開名稱混淆。搜尋中文前仍建議先套 UTF-8 防護。"
+      },
+      count: {
+        command: "$env:Path = \"C:\\\\Program Files\\\\coreutils\\\\bin;$env:Path\"\\ncat.exe file.txt | grep.exe \"繁體中文\" | wc.exe -l",
+        explain: "這條管線會顯示命中的行數。管線是把前一個程式的輸出交給下一個程式。"
+      }
+    };
+
+    let index = 0;
+    let activeCase = "alias";
+
+    function fit() {
+      const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      stage.style.transform = `scale(${scale})`;
+    }
+
+    function renderPips() {
+      pips.innerHTML = slides.map((_, i) => `<span class="pip ${i === index ? "on" : ""}"></span>`).join("");
+    }
+
+    function showSlide(next) {
+      index = (next + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
+      counter.textContent = String(index + 1).padStart(2, "0") + " / " + String(slides.length).padStart(2, "0");
+      renderPips();
+    }
+
+    function renderCase(name) {
+      activeCase = name;
+      document.querySelectorAll(".scenario-buttons button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.case === name);
+      });
+      document.getElementById("terminal").textContent = cases[name].command;
+      document.getElementById("explain").textContent = cases[name].explain;
+      document.getElementById("copied").textContent = "";
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => showSlide(index - 1));
+    document.getElementById("nextBtn").addEventListener("click", () => showSlide(index + 1));
+    document.querySelectorAll(".scenario-buttons button").forEach(btn => {
+      btn.addEventListener("click", () => renderCase(btn.dataset.case));
+    });
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const text = cases[activeCase].command;
+      let copied = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          copied = true;
+        }
+      } catch (error) {
+        copied = false;
+      }
+      if (!copied) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          copied = document.execCommand("copy");
+        } catch (error) {
+          copied = false;
+        }
+        document.body.removeChild(textarea);
+      }
+      document.getElementById("copied").textContent = copied ? "已複製" : "請手動複製上方命令";
+    });
+    window.addEventListener("keydown", event => {
+      if (event.key === "ArrowRight") showSlide(index + 1);
+      if (event.key === "ArrowLeft") showSlide(index - 1);
+    });
+    window.addEventListener("resize", fit);
+    fit();
+    renderPips();
+    renderCase(activeCase);
+  </script>
+</body>
+</html>
